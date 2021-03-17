@@ -9,11 +9,11 @@ public class SwiftDatabase {
 
 // MARK: - Tables
 extension SwiftDatabase {
-
+    
     func makeTableName<Item>(name: String? = nil, itemType: Item.Type) -> String {
         name ?? String(describing: Item.self)
     }
-
+    
     func createTable(name: String) {
         if data[name] == nil {
             data[name] = []
@@ -26,7 +26,7 @@ extension SwiftDatabase {
     
     @discardableResult
     public func insert<Item: Codable & Equatable>(on name: String? = nil,
-                                           item: Item) -> Bool {
+                                                  item: Item) -> Bool {
         
         let name = makeTableName(name: name, itemType: Item.self)
         createTable(name: name)
@@ -36,7 +36,7 @@ extension SwiftDatabase {
     
     @discardableResult
     public func insert<Item: Codable & Equatable>(on name: String? = nil,
-                                           items: [Item]) -> Bool {
+                                                  items: [Item]) -> Bool {
         
         let name = makeTableName(name: name, itemType: Item.self)
         createTable(name: name)
@@ -47,12 +47,30 @@ extension SwiftDatabase {
 
 // MARK: - Read
 extension SwiftDatabase {
-
-    func read<Item: Codable & Equatable>(from name: String? = nil,
-                                         filter: ((Item) -> Bool) = { _ in true }) -> [Item] {
+    
+    public func read<Item: Codable & Equatable>(from name: String? = nil,
+                                                filter: ((Item) -> Bool) = { _ in true }) -> [Item] {
         
         let name = makeTableName(name: name, itemType: Item.self)
         guard let items = data[name] as? [Item] else { return [] }
         return items.filter { item in filter(item) }
+    }
+}
+
+// MARK: - Update
+extension SwiftDatabase {
+    
+    @discardableResult
+    public func update<Item: Codable & Equatable>(item: Item,
+                                                  from name: String? = nil) -> Bool {
+        
+        let name = makeTableName(name: name, itemType: Item.self)
+        guard let items = data[name] as? [Item] else { return false }
+        let indexes = items.enumerated().compactMap { $0.element == item ? $0.offset : nil }
+        if indexes.count == 0 { return false }
+        for index in indexes {
+            data[name]?[index] = item
+        }
+        return true
     }
 }
