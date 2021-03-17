@@ -10,35 +10,104 @@ class SwiftDatabaseTests: QuickSpec {
         
         describe("SwiftDatabase") {
             
-            context("CRUD") {
+            beforeEach {
+                database = SwiftDatabase()
+            }
+            
+            context("Tables") {
+            
+                context("makeTableName") {
                     
-                beforeEach {
-                    database = SwiftDatabase()
+                    it("should return the specified name") {
+                        let result = database.makeTableName(name: "test", itemType: Person.self)
+                        expect(result) == "test"
+                    }
+                    
+                    it("should return the name of the item type") {
+                        let result = database.makeTableName(itemType: Person.self)
+                        expect(result) == "Person"
+                    }
                 }
                 
-                context("Insert") {
+                context("createTable") {
+                    
+                    it("should create a table if not exists") {
+                        expect(database.data["Int"]).to(beNil())
+                        database.createTable(name: "Int")
+                        expect(database.data["Int"]).toNot(beNil())
+                        expect(database.data.count) == 1
+                    }
+                    
+                    it("should create a table if not exists") {
+                        database.createTable(name: "Int")
+                        expect(database.data["Int"]).toNot(beNil())
+                        expect(database.data.count) == 1
+                        database.createTable(name: "Int")
+                        expect(database.data["Int"]).toNot(beNil())
+                        expect(database.data.count) == 1
+                    }
+                }
+            }
+            
+            context("Insert") {
                 
-                    it("should insert a row without the table name") {
-                        let row = Person(id: 1, name: "Ricardo", age: 35)
-                        let result = database.insert(item: row)
+                context("Single item") {
+                    
+                    it("should insert an item without the table name") {
+                        let result = database.insert(item: Person(id: 1, name: "Ricardo", age: 35))
                         expect(result).to(beTrue())
                         expect(database.data["Person"]?.count) == 1
                     }
                     
-                    it("should insert a row with the table name") {
-                        let row = Person(id: 1, name: "Ricardo", age: 35)
-                        let result = database.insert(on: "people", item: row)
+                    it("should insert an item with the table name") {
+                        let result = database.insert(on: "people", item: Person(id: 1, name: "Ricardo", age: 35))
                         expect(result).to(beTrue())
                         expect(database.data["people"]?.count) == 1
                     }
                     
-                    it("should insert a new row when the table already exists") {
+                    it("should insert a new item when the table already exists") {
                         var result = database.insert(item: Person(id: 1, name: "Ricardo", age: 35))
                         expect(result).to(beTrue())
                         expect(database.data["Person"]?.count) == 1
                         result = database.insert(item: Person(id: 2, name: "Paul", age: 40))
                         expect(result).to(beTrue())
                         expect(database.data["Person"]?.count) == 2
+                    }
+                }
+                
+                context("Multiple Items") {
+                    
+                    it("should insert multiple items without the table name") {
+                        let items: [Person] = [
+                            Person(id: 1, name: "Ricardo", age: 35),
+                            Person(id: 2, name: "Paul", age: 40)
+                        ]
+                        let result = database.insert(items: items)
+                        expect(result).to(beTrue())
+                        expect(database.data["Person"]?.count) == 2
+                    }
+                    
+                    it("should insert multiple items with the table name") {
+                        let items: [Person] = [
+                            Person(id: 1, name: "Ricardo", age: 35),
+                            Person(id: 2, name: "Paul", age: 40)
+                        ]
+                        let result = database.insert(on: "people", items: items)
+                        expect(result).to(beTrue())
+                        expect(database.data["people"]?.count) == 2
+                    }
+                    
+                    it("should insert a set of new items when the table already exists") {
+                        var result = database.insert(item: Person(id: 0, name: "Mike", age: 25))
+                        expect(result).to(beTrue())
+                        expect(database.data["Person"]?.count) == 1
+                        let items: [Person] = [
+                            Person(id: 1, name: "Ricardo", age: 35),
+                            Person(id: 2, name: "Paul", age: 40)
+                        ]
+                        result = database.insert(items: items)
+                        expect(result).to(beTrue())
+                        expect(database.data["Person"]?.count) == 3
                     }
                 }
             }
