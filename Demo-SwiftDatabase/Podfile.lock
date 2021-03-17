@@ -1,3 +1,29 @@
-PODFILE CHECKSUM: c5cbe6752faf5c052c0c8d48b9714b05020c6134
+PODS:
+  - Nimble (8.1.2)
+  - Quick (3.0.0)
+  - SwiftDatabase (1.0.0)
+  - SwiftDatabase/Tests (1.0.0):
+    - Nimble (= 8.1.2)
+    - Quick (= 3.0.0)
+
+DEPENDENCIES:
+  - SwiftDatabase (from `../`)
+  - SwiftDatabase/Tests (from `../`)
+
+SPEC REPOS:
+  trunk:
+    - Nimble
+    - Quick
+
+EXTERNAL SOURCES:
+  SwiftDatabase:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Nimble: 3864815b4703c7ebffba875973c70e854489fbae
+  Quick: 6d9559f40647bc4d510103842ef2fdd882d753e2
+  SwiftDatabase: 97af31b178dabc66cec14dbffc91438b787b677a
+
+PODFILE CHECKSUM: 03cfd14a1a610a4c0d2330a4b025be572db8d541
 
 COCOAPODS: 1.10.1

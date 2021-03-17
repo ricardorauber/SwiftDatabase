@@ -1,19 +1,5 @@
-# Uncomment the next line to define a global platform for your project
-# platform :ios, '9.0'
-
 target 'Demo-SwiftDatabase' do
-  # Comment the next line if you don't want to use dynamic frameworks
-  use_frameworks!
+  platform :ios, '12.4'
 
-  # Pods for Demo-SwiftDatabase
-
-  target 'Demo-SwiftDatabaseTests' do
-    inherit! :search_paths
-    # Pods for testing
-  end
-
-  target 'Demo-SwiftDatabaseUITests' do
-    # Pods for testing
-  end
-
+  pod 'SwiftDatabase', :path => '../', :testspecs => ['Tests']
 end
