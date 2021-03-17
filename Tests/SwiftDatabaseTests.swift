@@ -111,6 +111,47 @@ class SwiftDatabaseTests: QuickSpec {
                     }
                 }
             }
+            
+            context("Read") {
+            
+                beforeEach {
+                    database.insert(on: "people", item: Person(id: 0, name: "John", age: 50))
+                    let items: [Person] = [
+                        Person(id: 0, name: "Mike", age: 25),
+                        Person(id: 1, name: "Ricardo", age: 35),
+                        Person(id: 2, name: "Paul", age: 40)
+                    ]
+                    database.insert(items: items)
+                }
+                
+                it("should get an empty array from a non existent table") {
+                    let result: [Person] = database.read(from: "dummy")
+                    expect(result.count) == 0
+                }
+                
+                it("should get an empty array if the table is not from the same item type") {
+                    database.insert(on: "dummy", item: 10)
+                    let result: [Person] = database.read(from: "dummy")
+                    expect(result.count) == 0
+                }
+                
+                it("should read all items from an existing table") {
+                    let result: [Person] = database.read()
+                    expect(result.count) == 3
+                }
+                
+                it("should read all items from a table with a specific name") {
+                    let result: [Person] = database.read(from: "people")
+                    expect(result.count) == 1
+                }
+                
+                it("should read all items using a filter") {
+                    let result: [Person] = database.read() { item in
+                        item.age < 40
+                    }
+                    expect(result.count) == 2
+                }
+            }
         }
     }
 }

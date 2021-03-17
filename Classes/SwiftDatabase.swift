@@ -44,3 +44,15 @@ extension SwiftDatabase {
         return true
     }
 }
+
+// MARK: - Read
+extension SwiftDatabase {
+
+    func read<Item: Codable & Equatable>(from name: String? = nil,
+                                         filter: ((Item) -> Bool) = { _ in true }) -> [Item] {
+        
+        let name = makeTableName(name: name, itemType: Item.self)
+        guard let items = data[name] as? [Item] else { return [] }
+        return items.filter { item in filter(item) }
+    }
+}
