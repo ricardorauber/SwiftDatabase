@@ -330,6 +330,38 @@ class SwiftDatabaseTests: QuickSpec {
                         expect(items.count) == 0
                     }
                 }
+                
+                context("Multiple Items") {
+                    
+                    it("should return false from a non existent table") {
+                        let items: [Person] = [
+                            Person(id: 0, name: "Mike", age: 25)
+                        ]
+                        let result = database.delete(items: items, from: "dummy")
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should return false from non existent items") {
+                        let items: [Person] = [
+                            Person(id: 99, name: "Steve", age: 55)
+                        ]
+                        let result = database.delete(items: items)
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should return true when the update worked") {
+                        let items: [Person] = [
+                            Person(id: 0, name: "Mike", age: 26),
+                            Person(id: 1, name: "Richard", age: 35)
+                        ]
+                        let result = database.delete(items: items)
+                        expect(result).to(beTrue())
+                        let results: [Person] = database.read { item in
+                            item.id == 0 || item.id == 1
+                        }
+                        expect(results.count) == 0
+                    }
+                }
             }
         }
     }

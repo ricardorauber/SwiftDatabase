@@ -121,4 +121,16 @@ extension SwiftDatabase {
         }
         return true
     }
+    
+    @discardableResult
+    public func delete<Item: Codable & Equatable>(items: [Item],
+                                                  from name: String? = nil) -> Bool {
+        
+        for item in items {
+            if !delete(item: item, from: name) {
+                return false
+            }
+        }
+        return true
+    }
 }
