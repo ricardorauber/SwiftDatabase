@@ -104,3 +104,21 @@ extension SwiftDatabase {
         return true
     }
 }
+
+// MARK: - Delete
+extension SwiftDatabase {
+    
+    @discardableResult
+    public func delete<Item: Codable & Equatable>(item: Item,
+                                                  from name: String? = nil) -> Bool {
+        
+        let name = makeTableName(name: name, itemType: Item.self)
+        guard let items = data[name] as? [Item] else { return false }
+        let indexes = items.enumerated().compactMap { $0.element == item ? $0.offset : nil }
+        if indexes.count == 0 { return false }
+        for index in indexes.reversed() {
+            data[name]?.remove(at: index)
+        }
+        return true
+    }
+}

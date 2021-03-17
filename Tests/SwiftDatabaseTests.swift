@@ -294,6 +294,43 @@ class SwiftDatabaseTests: QuickSpec {
                     }
                 }
             }
+            
+            context("Delete") {
+            
+                beforeEach {
+                    let items: [Person] = [
+                        Person(id: 0, name: "Mike", age: 25),
+                        Person(id: 1, name: "Ricardo", age: 35),
+                        Person(id: 2, name: "Paul", age: 40)
+                    ]
+                    database.insert(items: items)
+                }
+                
+                context("Single Item") {
+                
+                    it("should return false from a non existent table") {
+                        let item = Person(id: 0, name: "Mike", age: 25)
+                        let result = database.delete(item: item, from: "dummy")
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should return false from a non existent item") {
+                        let item = Person(id: 99, name: "Steve", age: 55)
+                        let result = database.delete(item: item)
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should return true when the removal worked") {
+                        let item = Person(id: 0, name: "Mike", age: 26)
+                        let result = database.delete(item: item)
+                        expect(result).to(beTrue())
+                        let items: [Person] = database.read { item in
+                            item.id == 0
+                        }
+                        expect(items.count) == 0
+                    }
+                }
+            }
         }
     }
 }
