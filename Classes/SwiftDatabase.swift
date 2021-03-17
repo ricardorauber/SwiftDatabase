@@ -133,4 +133,19 @@ extension SwiftDatabase {
         }
         return true
     }
+    
+    @discardableResult
+    public func deleteAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
+                                                          from name: String? = nil,
+                                                          filter: ((Item) -> Bool) = { _ in true }) -> Bool {
+        
+        let name = name ?? String(describing: Item.self)
+        guard let items = data[name] as? [Item] else { return false }
+        let indexes = items.enumerated().compactMap { filter($0.element) ? $0.offset : nil }
+        if indexes.count == 0 { return false }
+        for index in indexes.reversed() {
+            data[name]?.remove(at: index)
+        }
+        return true
+    }
 }

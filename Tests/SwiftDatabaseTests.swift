@@ -362,6 +362,50 @@ class SwiftDatabaseTests: QuickSpec {
                         expect(results.count) == 0
                     }
                 }
+                
+                context("All Items") {
+                
+                    it("should return false from a non existent table") {
+                        let result = database.deleteAllItems(
+                            of: Person.self,
+                            from: "dummy"
+                        )
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should return false from non existent items") {
+                        let result = database.deleteAllItems(
+                            of: Person.self,
+                            filter: { item in
+                                item.id == 99
+                            }
+                        )
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should return true when the update worked") {
+                        let result = database.deleteAllItems(
+                            of: Person.self
+                        )
+                        expect(result).to(beTrue())
+                        let results: [Person] = database.read()
+                        expect(results.count) == 0
+                    }
+                    
+                    it("should return true when the update worked with filter") {
+                        let result = database.deleteAllItems(
+                            of: Person.self,
+                            filter: { item in
+                                item.age < 40
+                            }
+                        )
+                        expect(result).to(beTrue())
+                        let results: [Person] = database.read(filter: { item in
+                            item.age < 40
+                        })
+                        expect(results.count) == 0
+                    }
+                }
             }
         }
     }
