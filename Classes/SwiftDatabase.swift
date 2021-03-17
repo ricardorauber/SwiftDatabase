@@ -73,4 +73,34 @@ extension SwiftDatabase {
         }
         return true
     }
+    
+    @discardableResult
+    public func update<Item: Codable & Equatable>(items: [Item],
+                                                  from name: String? = nil) -> Bool {
+        
+        for item in items {
+            if !update(item: item, from: name) {
+                return false
+            }
+        }
+        return true
+    }
+    
+    @discardableResult
+    public func updateAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
+                                                          from name: String? = nil,
+                                                          changes: @escaping (Item) -> Item,
+                                                          filter: ((Item) -> Bool) = { _ in true }) -> Bool {
+        
+        let name = makeTableName(name: name, itemType: Item.self)
+        guard let items = data[name] as? [Item] else { return false }
+        let indexes = items.enumerated().compactMap { filter($0.element) ? $0.offset : nil }
+        if indexes.count == 0 { return false }
+        for index in indexes {
+            var newItem: Item = items[index]
+            newItem = changes(newItem)
+            data[name]?[index] = newItem
+        }
+        return true
+    }
 }

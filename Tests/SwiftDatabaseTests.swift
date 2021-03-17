@@ -189,6 +189,110 @@ class SwiftDatabaseTests: QuickSpec {
                         expect(items.first?.age) == 26
                     }
                 }
+            
+                context("Multiple Items") {
+                    
+                    it("should return false from a non existent table") {
+                        let items: [Person] = [
+                            Person(id: 0, name: "Mike", age: 25)
+                        ]
+                        let result = database.update(items: items, from: "dummy")
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should return false from non existent items") {
+                        let items: [Person] = [
+                            Person(id: 99, name: "Steve", age: 55)
+                        ]
+                        let result = database.update(items: items)
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should return true when the update worked") {
+                        let items: [Person] = [
+                            Person(id: 0, name: "Mike", age: 26),
+                            Person(id: 1, name: "Richard", age: 35)
+                        ]
+                        let result = database.update(items: items)
+                        expect(result).to(beTrue())
+                        let results: [Person] = database.read { item in
+                            item.id == 0 || item.id == 1
+                        }
+                        expect(results.count) == 2
+                        expect(results.first?.age) == 26
+                        expect(results.last?.name) == "Richard"
+                    }
+                }
+                
+                context("All Items") {
+                
+                    it("should return false from a non existent table") {
+                        let result = database.updateAllItems(
+                            of: Person.self,
+                            from: "dummy",
+                            changes: { item in
+                                var item = item
+                                item.age = item.age + 1
+                                return item
+                            }
+                        )
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should return false from non existent items") {
+                        let result = database.updateAllItems(
+                            of: Person.self,
+                            changes: { item in
+                                var item = item
+                                item.age = item.age + 1
+                                return item
+                            },
+                            filter: { item in
+                                item.id == 99
+                            }
+                        )
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should return true when the update worked") {
+                        let result = database.updateAllItems(
+                            of: Person.self,
+                            changes: { item in
+                                var item = item
+                                item.age = 0
+                                return item
+                            }
+                        )
+                        expect(result).to(beTrue())
+                        let results: [Person] = database.read()
+                        expect(results.count) == 3
+                        for person in results {
+                            expect(person.age) == 0
+                        }
+                    }
+                    
+                    it("should return true when the update worked with filter") {
+                        let result = database.updateAllItems(
+                            of: Person.self,
+                            changes: { item in
+                                var item = item
+                                item.age = 0
+                                return item
+                            },
+                            filter: { item in
+                                item.age < 40
+                            }
+                        )
+                        expect(result).to(beTrue())
+                        let results: [Person] = database.read(filter: { item in
+                            item.age < 40
+                        })
+                        expect(results.count) == 2
+                        for person in results {
+                            expect(person.age) == 0
+                        }
+                    }
+                }
             }
         }
     }
