@@ -1,6 +1,6 @@
 import Foundation
 
-public protocol SwiftDatabaseProtocol: AnyObject {
+public protocol SwiftDatabaseProtocol {
     
     // MARK: - Dependencies
     
