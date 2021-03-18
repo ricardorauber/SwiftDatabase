@@ -1,7 +1,7 @@
 language: swift
 os: osx
 osx_image: xcode12.2
-xcode_workspace: Demo/Demo.xcworkspace
-xcode_scheme: Demo
+xcode_workspace: Demo-SwiftDatabase/Demo-SwiftDatabase.xcworkspace
+xcode_scheme: Demo-SwiftDatabase
 xcode_destination: platform=iOS Simulator,OS=13.7,name=iPhone 8
-podfile: Demo/Podfile
+podfile: Demo-SwiftDatabase/Podfile
