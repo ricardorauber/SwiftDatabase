@@ -44,6 +44,7 @@ extension SwiftDatabase {
 // MARK: - Files
 extension SwiftDatabase {
     
+    @discardableResult
     public func save(to fileUrl: URL) -> Bool {
         var result = false
         if let data = data {
@@ -55,6 +56,7 @@ extension SwiftDatabase {
         return result
     }
 
+    @discardableResult
     public func load(from fileUrl: URL) -> Bool {
         do {
             let data = try Data(contentsOf: fileUrl)
@@ -95,9 +97,8 @@ extension SwiftDatabase {
 extension SwiftDatabase {
 
     @discardableResult
-    public func insert<Item: Codable & Equatable>(on name: String? = nil,
+    public func insert<Item: Codable & Equatable>(on name: String,
                                                   item: Item) -> Bool {
-
         let name = makeTableName(name: name, itemType: Item.self)
         createTable(name: name)
         var rows: [Item] = getTable(name: name) ?? []
@@ -106,26 +107,54 @@ extension SwiftDatabase {
     }
 
     @discardableResult
-    public func insert<Item: Codable & Equatable>(on name: String? = nil,
-                                                  items: [Item]) -> Bool {
+    public func insert<Item: Codable & Equatable>(item: Item) -> Bool {
+        let name = makeTableName(name: nil, itemType: Item.self)
+        return insert(on: name, item: item)
+    }
 
+    @discardableResult
+    public func insert<Item: Codable & Equatable>(on name: String,
+                                                  items: [Item]) -> Bool {
         let name = makeTableName(name: name, itemType: Item.self)
         createTable(name: name)
         var rows: [Item] = getTable(name: name) ?? []
         rows.append(contentsOf: items)
         return setTable(name: name, rows: rows)
     }
+
+    @discardableResult
+    public func insert<Item: Codable & Equatable>(items: [Item]) -> Bool {
+        let name = makeTableName(name: nil, itemType: Item.self)
+        return insert(on: name, items: items)
+    }
 }
 
 // MARK: - Read
 extension SwiftDatabase {
 
-    public func read<Item: Codable & Equatable>(from name: String? = nil,
-                                                filter: ((Item) -> Bool) = { _ in true }) -> [Item] {
-
+    public func read<Item: Codable & Equatable>(from name: String,
+                                                filter: ((Item) -> Bool)) -> [Item] {
         let name = makeTableName(name: name, itemType: Item.self)
         let items: [Item] = getTable(name: name) ?? []
         return items.filter { item in filter(item) }
+    }
+
+    public func read<Item: Codable & Equatable>(filter: ((Item) -> Bool)) -> [Item] {
+        let name = makeTableName(name: nil, itemType: Item.self)
+        return read(from: name, filter: filter)
+    }
+
+    public func read<Item: Codable & Equatable>(from name: String) -> [Item] {
+        let name = makeTableName(name: name, itemType: Item.self)
+        let filter: ((Item) -> Bool) = { _ in true }
+        let items: [Item] = getTable(name: name) ?? []
+        return items.filter { item in filter(item) }
+    }
+
+    public func read<Item: Codable & Equatable>() -> [Item] {
+        let name = makeTableName(name: nil, itemType: Item.self)
+        let filter: ((Item) -> Bool) = { _ in true }
+        return read(from: name, filter: filter)
     }
 }
 
@@ -134,8 +163,7 @@ extension SwiftDatabase {
 
     @discardableResult
     public func update<Item: Codable & Equatable>(item: Item,
-                                                  from name: String? = nil) -> Bool {
-
+                                                  from name: String) -> Bool {
         let name = makeTableName(name: name, itemType: Item.self)
         var items: [Item] = getTable(name: name) ?? []
         let indexes = items.enumerated().compactMap { $0.element == item ? $0.offset : nil }
@@ -147,9 +175,14 @@ extension SwiftDatabase {
     }
 
     @discardableResult
-    public func update<Item: Codable & Equatable>(items: [Item],
-                                                  from name: String? = nil) -> Bool {
+    public func update<Item: Codable & Equatable>(item: Item) -> Bool {
+        let name = makeTableName(name: nil, itemType: Item.self)
+        return update(item: item, from: name)
+    }
 
+    @discardableResult
+    public func update<Item: Codable & Equatable>(items: [Item],
+                                                  from name: String) -> Bool {
         for item in items {
             if !update(item: item, from: name) {
                 return false
@@ -159,11 +192,16 @@ extension SwiftDatabase {
     }
 
     @discardableResult
-    public func updateAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                          from name: String? = nil,
-                                                          changes: @escaping (Item) -> Item,
-                                                          filter: ((Item) -> Bool) = { _ in true }) -> Bool {
+    public func update<Item: Codable & Equatable>(items: [Item]) -> Bool {
+        let name = makeTableName(name: nil, itemType: Item.self)
+        return update(items: items, from: name)
+    }
 
+    @discardableResult
+    public func updateAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
+                                                          from name: String,
+                                                          changes: @escaping (Item) -> Item,
+                                                          filter: ((Item) -> Bool)) -> Bool {
         let name = makeTableName(name: name, itemType: Item.self)
         var items: [Item] = getTable(name: name) ?? []
         let indexes = items.enumerated().compactMap { filter($0.element) ? $0.offset : nil }
@@ -175,6 +213,30 @@ extension SwiftDatabase {
         }
         return setTable(name: name, rows: items)
     }
+
+    @discardableResult
+    public func updateAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
+                                                          changes: @escaping (Item) -> Item,
+                                                          filter: ((Item) -> Bool)) -> Bool {
+        let name = makeTableName(name: nil, itemType: Item.self)
+        return updateAllItems(of: itemType, from: name, changes: changes, filter: filter)
+    }
+
+    @discardableResult
+    public func updateAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
+                                                          from name: String,
+                                                          changes: @escaping (Item) -> Item) -> Bool {
+        let filter: ((Item) -> Bool) = { _ in true }
+        return updateAllItems(of: itemType, from: name, changes: changes, filter: filter)
+    }
+
+    @discardableResult
+    public func updateAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
+                                                          changes: @escaping (Item) -> Item) -> Bool {
+        let name = makeTableName(name: nil, itemType: Item.self)
+        let filter: ((Item) -> Bool) = { _ in true }
+        return updateAllItems(of: itemType, from: name, changes: changes, filter: filter)
+    }
 }
 
 // MARK: - Delete
@@ -182,8 +244,7 @@ extension SwiftDatabase {
 
     @discardableResult
     public func delete<Item: Codable & Equatable>(item: Item,
-                                                  from name: String? = nil) -> Bool {
-
+                                                  from name: String) -> Bool {
         let name = makeTableName(name: name, itemType: Item.self)
         var items: [Item] = getTable(name: name) ?? []
         let indexes = items.enumerated().compactMap { $0.element == item ? $0.offset : nil }
@@ -195,9 +256,14 @@ extension SwiftDatabase {
     }
 
     @discardableResult
-    public func delete<Item: Codable & Equatable>(items: [Item],
-                                                  from name: String? = nil) -> Bool {
+    public func delete<Item: Codable & Equatable>(item: Item) -> Bool {
+        let name = makeTableName(name: nil, itemType: Item.self)
+        return delete(item: item, from: name)
+    }
 
+    @discardableResult
+    public func delete<Item: Codable & Equatable>(items: [Item],
+                                                  from name: String) -> Bool {
         for item in items {
             if !delete(item: item, from: name) {
                 return false
@@ -207,11 +273,17 @@ extension SwiftDatabase {
     }
 
     @discardableResult
-    public func deleteAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                          from name: String? = nil,
-                                                          filter: ((Item) -> Bool) = { _ in true }) -> Bool {
+    public func delete<Item: Codable & Equatable>(items: [Item]) -> Bool {
+        let name = makeTableName(name: nil, itemType: Item.self)
+        return delete(items: items, from: name)
+    }
 
-        let name = name ?? String(describing: Item.self)
+    @discardableResult
+    public func deleteAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
+                                                          from name: String,
+                                                          filter: ((Item) -> Bool)) -> Bool {
+
+        let name = makeTableName(name: name, itemType: Item.self)
         var items: [Item] = getTable(name: name) ?? []
         let indexes = items.enumerated().compactMap { filter($0.element) ? $0.offset : nil }
         if indexes.count == 0 { return false }
@@ -220,4 +292,29 @@ extension SwiftDatabase {
         }
         return setTable(name: name, rows: items)
     }
+
+    @discardableResult
+    public func deleteAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
+                                                          filter: ((Item) -> Bool)) -> Bool {
+
+        let name = makeTableName(name: nil, itemType: Item.self)
+        return deleteAllItems(of: itemType, from: name, filter: filter)
+    }
+
+    @discardableResult
+    public func deleteAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
+                                                          from name: String) -> Bool {
+        let filter: ((Item) -> Bool) = { _ in true }
+        return deleteAllItems(of: itemType, from: name, filter: filter)
+    }
+
+    @discardableResult
+    public func deleteAllItems<Item: Codable & Equatable>(of itemType: Item.Type) -> Bool {
+        let name = makeTableName(name: nil, itemType: Item.self)
+        let filter: ((Item) -> Bool) = { _ in true }
+        return deleteAllItems(of: itemType, from: name, filter: filter)
+    }
 }
+
+// MARK: - SwiftDatabaseProtocol
+extension SwiftDatabase: SwiftDatabaseProtocol {}
