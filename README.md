@@ -10,13 +10,13 @@
 `SwiftDatabase` is a light Swift-like database that you can use on your projects, check this out:
 
 ```swift
-let database = SwiftDataBase()
+let database = SwiftDatabase()
 
 database.insert(item: Person(id: 0, name: "Ricardo", age: 35))
 database.insert(item: Person(id: 1, name: "Mike", age: 23))
 database.insert(item: Person(id: 2, name: "Paul", age: 40))
 
-let people: [Person] = database.get { person in
+let people: [Person] = database.read { person in
     person.age > 30
 }
 print(people) // [Ricardo, Paul]
@@ -24,7 +24,7 @@ print(people) // [Ricardo, Paul]
 
 ## SwiftDatabase
 
-Databases are really important in many kinds of apps. There are already many different solutions out there with incredible capabilities such as cloud synchronization. Why I made this framework then? Well, in many projects I have used Realm, COreData and SQLite, for instance, but all of them need some customization in the code that will increase dependency. I have always thought on building a database that my code will not even know that it is a database, it would think that it is just a new kind of set or dictionary. But I know that showing some code is better than large texts, so let's dig into it.
+Databases are really important in many kinds of apps. There are already many different solutions out there with incredible capabilities such as cloud synchronization. Why I made this framework then? Well, in many projects I have used Realm, CoreData and SQLite, for instance, but all of them need some customization in the code that increase dependency. I have always thought on building a database where my code will not even know that it is a database, it would think that it is just a new kind of set or dictionary. But I know that showing some code is better than large texts, so let's dig into it.
 
 ## Setup
 
@@ -53,7 +53,7 @@ import SwiftDatabase
 let database = SwiftDatabase()
 ```
 
-`SwiftDatabase` uses `JSONEncoder` and `JSONDecoder` to handle the storage of your data, so you can use your custom ones at the initialization or, if you already have some `Data` from a previous session, you can use it at the `init` as well:
+`SwiftDatabase` uses `JSONEncoder` and `JSONDecoder` to handle the storage of your data, so you can use your custom objects at the initialization or, if you already have some `Data` from a previous session, you can use it at the `init` as well:
 
 ```swift
 let database = SwiftDatabase(
@@ -78,7 +78,7 @@ guard let databaseData = databaseData else { return }
 database.set(data: databaseData)
 ```
 
-That's great for runtime, but what about persistance? You can use the `save` and `load` methods to store your database in the file system, for instance:
+That's great for runtime, but what about persistence? You can use the `save` and `load` methods to store your database in the file system, for instance:
 
 ```swift
 database.save(to: fileUrl)
@@ -87,7 +87,7 @@ database.load(from: fileUrl)
 
 ### CRUD
 
-First things first, let's understand how the database works. You can use any kind of `Codable & Equatable` object without any other customization. So, let's take a look at a sapmle object that we will use here:
+First things first, let's understand how the database works. You can use any kind of `Codable & Equatable` object without any other customization. So, let's take a look at a sample object that we will use here:
 
 ```swift
 struct Person: Codable, Equatable {
@@ -108,7 +108,7 @@ Every "table" in `SwiftDatabase` is an `array` of items of the same type. You ca
 
 #### Primary Key
 
-`SwiftDatabase` is not a relational database, it is as simple as a set of arrays. Because of that, there is no primary or foreign keys, every query will use the `Equatable` protocol to diferentiate objects.
+`SwiftDatabase` is not a relational database, actually it is as simple as a set of arrays. Because of that, there is no primary or foreign keys, every query will use the `Equatable` protocol to diferentiate objects.
 
 #### Insert
 
@@ -128,13 +128,13 @@ let steve = Person(id: 1, name: "Steve", age: 50)
 database.insert(on: "VIP", item: steve)
 ```
 
-Now `SwiftDatabase` has a table called `VIP` with an array of `Person`.
+Now, `SwiftDatabase` has a table called `VIP` with an array of `Person`.
 
 Another thing is that you can add multiple values at the same time:
 
 ```swift
 let people: [Person] = [
-    Person(id: 0, name: "Ricardo", age: 35)
+    Person(id: 0, name: "Ricardo", age: 35),
     Person(id: 1, name: "Steve", age: 50)
 ]
 
@@ -145,11 +145,11 @@ database.insert(items: people)
 Now that we have some records in our database, it is time to retrieve them, so we will use the `read` method for that. The cool thing is that you can read all records or use a filter to get only what you need:
 
 ```swift
-let people: [People] = database.read()
+let people: [Person] = database.read()
 
-let vip: [People] = database.read(from: "VIP")
+let vip: [Person] = database.read(from: "VIP")
 
-let adults: [People] = database.read { person in
+let adults: [Person] = database.read { person in
     person.age > 18
 }
 ```
@@ -172,13 +172,15 @@ database.update(item: steve, from: "VIP")
 database.update(items: [steve, ricardo])
 ```
 
-The second one, `updateAllItems`, will update all items using a filter just like in the `read` method.
+The second method, `updateAllItems`, will update all items using a filter just like in the `read` method.
 
 ```swift
 database.updateAllItems(
     of: Person.self,
     changes: { person in
+        var person = person
         person.age = person.age + 1
+        return person
     },
     filter: { person in
         person.age >= 18
@@ -198,7 +200,7 @@ database.delete(item: steve, from: "VIP")
 database.delete(items: [ricardo, steve])
 ```
 
-Or you can also use a filter for that
+Or you can also use a filter for that:
 
 ```swift
 database.deleteAllItems(
