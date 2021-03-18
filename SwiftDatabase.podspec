@@ -12,8 +12,6 @@ Pod::Spec.new do |s|
   s.pod_target_xcconfig   = { 'ENABLE_TESTABILITY' => 'YES' }
   s.source_files          = 'Classes/**/*'
   
-  #s.dependency 'CryptoSwift', '1.3.2'
-  
   s.test_spec 'Tests' do |test_spec|
     test_spec.requires_app_host = true
     test_spec.source_files      = 'Tests/**/*'
