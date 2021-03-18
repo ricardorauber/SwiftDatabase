@@ -14,6 +14,76 @@ class SwiftDatabaseTests: QuickSpec {
                 database = SwiftDatabase()
             }
             
+            context("Init") {
+            
+                it("should create an empty database without data") {
+                    expect(database.tables.count) == 0
+                }
+                
+                it("should create an empty database from an incorrect data parameter") {
+                    do {
+                        let data = try JSONEncoder().encode(1)
+                        database = SwiftDatabase(data: data)
+                        expect(database.tables.count) == 0
+                    } catch {
+                        fail()
+                    }
+                }
+                
+                it("should create a database from a correct data parameter") {
+                    database.insert(item: Person(id: 0, name: "Mike", age: 25))
+                    guard let data = database.data else {
+                        fail()
+                        return
+                    }
+                    database = SwiftDatabase(data: data)
+                    let items: [Person] = database.read()
+                    expect(items.count) == 1
+                }
+            }
+            
+            context("Data") {
+            
+                context("data") {
+            
+                    it("should get the Data value from an empty database") {
+                        let result = database.data
+                        expect(result).toNot(beNil())
+                    }
+                    
+                    it("should get the Data value from a database") {
+                        database.insert(item: Person(id: 0, name: "Mike", age: 25))
+                        let data = database.data
+                        expect(data).toNot(beNil())
+                    }
+                }
+                
+                context("set(data:)") {
+                
+                    it("should return false if the data type is incorrect") {
+                        do {
+                            let data = try JSONEncoder().encode(1)
+                            let result = database.set(data: data)
+                            expect(result).to(beFalse())
+                        } catch {
+                            fail()
+                        }
+                    }
+                    
+                    it("should return true if the data type is correct") {
+                        database.insert(item: Person(id: 0, name: "Mike", age: 25))
+                        guard let data = database.data else {
+                            fail()
+                            return
+                        }
+                        let result = database.set(data: data)
+                        expect(result).to(beTrue())
+                        let items: [Person] = database.read()
+                        expect(items.count) == 1
+                    }
+                }
+            }
+            
             context("Tables") {
             
                 context("makeTableName") {
@@ -32,19 +102,47 @@ class SwiftDatabaseTests: QuickSpec {
                 context("createTable") {
                     
                     it("should create a table if not exists") {
-                        expect(database.data["Int"]).to(beNil())
+                        expect(database.tables["Int"]).to(beNil())
                         database.createTable(name: "Int")
-                        expect(database.data["Int"]).toNot(beNil())
-                        expect(database.data.count) == 1
+                        expect(database.tables["Int"]).toNot(beNil())
+                        expect(database.tables.count) == 1
                     }
                     
                     it("should create a table if not exists") {
                         database.createTable(name: "Int")
-                        expect(database.data["Int"]).toNot(beNil())
-                        expect(database.data.count) == 1
+                        expect(database.tables["Int"]).toNot(beNil())
+                        expect(database.tables.count) == 1
                         database.createTable(name: "Int")
-                        expect(database.data["Int"]).toNot(beNil())
-                        expect(database.data.count) == 1
+                        expect(database.tables["Int"]).toNot(beNil())
+                        expect(database.tables.count) == 1
+                    }
+                }
+                
+                context("setTable") {
+                
+                    it("should return false if the table doesn't exists") {
+                        let result = database.setTable(name: "dummy", rows: [1])
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should return true if the table exists") {
+                        database.insert(item: 1)
+                        let result = database.setTable(name: "Int", rows: [2])
+                        expect(result).to(beTrue())
+                    }
+                }
+                
+                context("getTable") {
+                
+                    it("should return nil if the table doesn't exists") {
+                        let result: [Int]? = database.getTable(name: "Int")
+                        expect(result).to(beNil())
+                    }
+                    
+                    it("should return the type if the table exists") {
+                        database.insert(item: 1)
+                        let result: [Int]? = database.getTable(name: "Int")
+                        expect(result).toNot(beNil())
                     }
                 }
             }
@@ -56,22 +154,26 @@ class SwiftDatabaseTests: QuickSpec {
                     it("should insert an item without the table name") {
                         let result = database.insert(item: Person(id: 1, name: "Ricardo", age: 35))
                         expect(result).to(beTrue())
-                        expect(database.data["Person"]?.count) == 1
+                        let table: [Person] = database.read()
+                        expect(table.count) == 1
                     }
                     
                     it("should insert an item with the table name") {
                         let result = database.insert(on: "people", item: Person(id: 1, name: "Ricardo", age: 35))
                         expect(result).to(beTrue())
-                        expect(database.data["people"]?.count) == 1
+                        let table: [Person] = database.read(from: "people")
+                        expect(table.count) == 1
                     }
                     
                     it("should insert a new item when the table already exists") {
                         var result = database.insert(item: Person(id: 1, name: "Ricardo", age: 35))
                         expect(result).to(beTrue())
-                        expect(database.data["Person"]?.count) == 1
+                        var table: [Person] = database.read()
+                        expect(table.count) == 1
                         result = database.insert(item: Person(id: 2, name: "Paul", age: 40))
                         expect(result).to(beTrue())
-                        expect(database.data["Person"]?.count) == 2
+                        table = database.read()
+                        expect(table.count) == 2
                     }
                 }
                 
@@ -84,7 +186,8 @@ class SwiftDatabaseTests: QuickSpec {
                         ]
                         let result = database.insert(items: items)
                         expect(result).to(beTrue())
-                        expect(database.data["Person"]?.count) == 2
+                        let table: [Person] = database.read()
+                        expect(table.count) == 2
                     }
                     
                     it("should insert multiple items with the table name") {
@@ -94,20 +197,23 @@ class SwiftDatabaseTests: QuickSpec {
                         ]
                         let result = database.insert(on: "people", items: items)
                         expect(result).to(beTrue())
-                        expect(database.data["people"]?.count) == 2
+                        let table: [Person] = database.read(from: "people")
+                        expect(table.count) == 2
                     }
                     
                     it("should insert a set of new items when the table already exists") {
                         var result = database.insert(item: Person(id: 0, name: "Mike", age: 25))
                         expect(result).to(beTrue())
-                        expect(database.data["Person"]?.count) == 1
+                        var table: [Person] = database.read()
+                        expect(table.count) == 1
                         let items: [Person] = [
                             Person(id: 1, name: "Ricardo", age: 35),
                             Person(id: 2, name: "Paul", age: 40)
                         ]
                         result = database.insert(items: items)
                         expect(result).to(beTrue())
-                        expect(database.data["Person"]?.count) == 3
+                        table = database.read()
+                        expect(table.count) == 3
                     }
                 }
             }
@@ -413,6 +519,7 @@ class SwiftDatabaseTests: QuickSpec {
 
 // MARK: - Test Helpers
 private struct Person: Codable, Equatable {
+
     var id: Int
     var name: String
     var age: Int
