@@ -141,7 +141,6 @@
 				80A9DC3DFA6AC7A7ECF79F7F /* Pods-Demo-SwiftDatabase.debug.xcconfig */,
 				F91B879C7208A4178D53B2F3 /* Pods-Demo-SwiftDatabase.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -491,6 +490,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4W8Y567J5C;
 				INFOPLIST_FILE = "Demo-SwiftDatabase/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.3;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -511,6 +511,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 4W8Y567J5C;
 				INFOPLIST_FILE = "Demo-SwiftDatabase/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.3;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
