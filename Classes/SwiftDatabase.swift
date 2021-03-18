@@ -41,6 +41,30 @@ extension SwiftDatabase {
     }
 }
 
+// MARK: - Files
+extension SwiftDatabase {
+    
+    public func save(to fileUrl: URL) -> Bool {
+        var result = false
+        if let data = data {
+            do {
+                try data.write(to: fileUrl)
+                result = true
+            } catch {}
+        }
+        return result
+    }
+
+    public func load(from fileUrl: URL) -> Bool {
+        do {
+            let data = try Data(contentsOf: fileUrl)
+            return set(data: data)
+        } catch {
+            return false
+        }
+    }
+}
+
 // MARK: - Tables
 extension SwiftDatabase {
 

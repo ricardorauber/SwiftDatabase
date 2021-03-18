@@ -84,6 +84,51 @@ class SwiftDatabaseTests: QuickSpec {
                 }
             }
             
+            context("Files") {
+            
+                let fileUrl: URL = {
+                    let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
+                    let documentsDirectory = paths[0]
+                    return documentsDirectory.appendingPathComponent("database").appendingPathExtension("sdb")
+                }()
+            
+                context("save") {
+                    
+                    it("should not save the database in an invalid URL") {
+                        let url = URL(string: "www.google.com")!
+                        let result = database.save(to: url)
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should save the database in a valid URL") {
+                        print("fileUrl", fileUrl)
+                        let result = database.save(to: fileUrl)
+                        expect(result).to(beTrue())
+                    }
+                }
+                
+                context("load") {
+                
+                    it("should not load the database from an invalid URL") {
+                        let url = URL(string: "www.google.com")!
+                        let result = database.load(from: url)
+                        expect(result).to(beFalse())
+                    }
+                    
+                    it("should load the database from a valid URL") {
+                        print("fileUrl", fileUrl)
+                        database.insert(items: [1, 2, 3])
+                        var result = database.save(to: fileUrl)
+                        expect(result).to(beTrue())
+                        database = SwiftDatabase()
+                        result = database.load(from: fileUrl)
+                        expect(result).to(beTrue())
+                        let items: [Int] = database.read()
+                        expect(items.count) == 3
+                    }
+                }
+            }
+            
             context("Tables") {
             
                 context("makeTableName") {
