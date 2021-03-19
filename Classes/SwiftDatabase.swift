@@ -9,16 +9,19 @@ public class SwiftDatabase {
     
     // MARK: - Properties
     
+    var fileUrl: URL?
     var tables: [String: AnyData] = [:]
     
     // MARK: - Initialization
     
     public init(data: Data? = nil,
+                fileUrl: URL? = nil,
                 encoder: JSONEncoder = JSONEncoder(),
                 decoder: JSONDecoder = JSONDecoder()) {
                 
         self.encoder = encoder
         self.decoder = decoder
+        self.fileUrl = fileUrl
         tables = [:]
         if let data = data {
             set(data: data)
@@ -55,6 +58,12 @@ extension SwiftDatabase {
         }
         return result
     }
+    
+    @discardableResult
+    public func save() -> Bool {
+        guard let fileUrl = fileUrl else { return false }
+        return save(to: fileUrl)
+    }
 
     @discardableResult
     public func load(from fileUrl: URL) -> Bool {
@@ -64,6 +73,12 @@ extension SwiftDatabase {
         } catch {
             return false
         }
+    }
+
+    @discardableResult
+    public func load() -> Bool {
+        guard let fileUrl = fileUrl else { return false }
+        return load(from: fileUrl)
     }
 }
 

@@ -18,7 +18,13 @@ public protocol SwiftDatabaseProtocol {
     func save(to fileUrl: URL) -> Bool
     
     @discardableResult
+    func save() -> Bool
+    
+    @discardableResult
     func load(from fileUrl: URL) -> Bool
+    
+    @discardableResult
+    func load() -> Bool
     
     // MARK: - Insert
     

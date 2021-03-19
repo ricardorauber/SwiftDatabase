@@ -53,11 +53,12 @@ import SwiftDatabase
 let database = SwiftDatabase()
 ```
 
-`SwiftDatabase` uses `JSONEncoder` and `JSONDecoder` to handle the storage of your data, so you can use your custom objects at the initialization or, if you already have some `Data` from a previous session, you can use it at the `init` as well:
+`SwiftDatabase` uses `JSONEncoder` and `JSONDecoder` to handle the storage of your data, so you can use your custom objects at the initialization or, if you already have some `Data` from a previous session, you can use it at the `init` as well. You can also specify a file url to save and load from:
 
 ```swift
 let database = SwiftDatabase(
     data: databaseData,
+    fileUrl: URL,
     encoder: myEncoder,
     decoder: myDecoder
 )
@@ -81,9 +82,18 @@ database.set(data: databaseData)
 That's great for runtime, but what about persistence? You can use the `save` and `load` methods to store your database in the file system, for instance:
 
 ```swift
+database.save()
+database.load()
+```
+
+You can also specify the file url in these methods:
+
+```swift
 database.save(to: fileUrl)
 database.load(from: fileUrl)
 ```
+
+If no file url is informed at init or as a parameter, it will return `false`.
 
 ### CRUD
 

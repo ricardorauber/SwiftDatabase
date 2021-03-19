@@ -101,9 +101,19 @@ class SwiftDatabaseTests: QuickSpec {
                     }
                     
                     it("should save the database in a valid URL") {
-                        print("fileUrl", fileUrl)
                         let result = database.save(to: fileUrl)
                         expect(result).to(beTrue())
+                    }
+                    
+                    it("should save the database in a valid URL from init") {
+                        database = SwiftDatabase(fileUrl: fileUrl)
+                        let result = database.save()
+                        expect(result).to(beTrue())
+                    }
+                    
+                    it("should be false if no url is informed") {
+                        let result = database.save()
+                        expect(result).to(beFalse())
                     }
                 }
                 
@@ -116,7 +126,6 @@ class SwiftDatabaseTests: QuickSpec {
                     }
                     
                     it("should load the database from a valid URL") {
-                        print("fileUrl", fileUrl)
                         database.insert(items: [1, 2, 3])
                         var result = database.save(to: fileUrl)
                         expect(result).to(beTrue())
@@ -125,6 +134,23 @@ class SwiftDatabaseTests: QuickSpec {
                         expect(result).to(beTrue())
                         let items: [Int] = database.read()
                         expect(items.count) == 3
+                    }
+                    
+                    it("should load the database from a valid URL from init") {
+                        database = SwiftDatabase(fileUrl: fileUrl)
+                        database.insert(items: [1, 2, 3])
+                        var result = database.save()
+                        expect(result).to(beTrue())
+                        database = SwiftDatabase(fileUrl: fileUrl)
+                        result = database.load()
+                        expect(result).to(beTrue())
+                        let items: [Int] = database.read()
+                        expect(items.count) == 3
+                    }
+                    
+                    it("should be false if no url is informed") {
+                        let result = database.load()
+                        expect(result).to(beFalse())
                     }
                 }
             }
