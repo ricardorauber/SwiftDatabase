@@ -26,6 +26,9 @@ public class SwiftDatabase {
         if let data = data {
             set(data: data)
         }
+        if let fileUrl = fileUrl {
+            load(from: fileUrl)
+        }
     }
 }
 
