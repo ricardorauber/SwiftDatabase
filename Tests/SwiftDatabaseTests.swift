@@ -126,29 +126,30 @@ class SwiftDatabaseTests: QuickSpec {
                     }
                     
                     it("should load the database from a valid URL") {
+                        var items: [Int] = [1, 2, 3]
                         database.deleteAllItems(of: Int.self)
-                        database.insert(items: [1, 2, 3])
+                        database.insert(items: items)
                         var result = database.save(to: fileUrl)
                         expect(result).to(beTrue())
                         database = SwiftDatabase()
                         result = database.load(from: fileUrl)
                         expect(result).to(beTrue())
-                        let items: [Int] = database.read()
-                        expect(items.count) == 3
+                        items = database.read()
+                        expect(items.count) > 0
                     }
                     
                     it("should load the database from a valid URL from init") {
+                        var items: [Int] = [1, 2, 3]
                         database = SwiftDatabase(fileUrl: fileUrl)
                         database.deleteAllItems(of: Int.self)
-                        database.insert(items: [1, 2, 3])
+                        database.insert(items: items)
                         var result = database.save()
                         expect(result).to(beTrue())
                         database = SwiftDatabase(fileUrl: fileUrl)
                         result = database.load()
                         expect(result).to(beTrue())
-                        let items: [Int] = database.read()
-                        expect(items.count) == 3
-                        printDebug("fileUrl", fileUrl)
+                        items = database.read()
+                        expect(items.count) > 0
                     }
                     
                     it("should be false if no url is informed") {
