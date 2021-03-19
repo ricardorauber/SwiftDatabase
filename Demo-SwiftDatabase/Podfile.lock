@@ -1,8 +1,8 @@
 PODS:
   - Nimble (8.1.2)
   - Quick (3.0.0)
-  - SwiftDatabase (1.0.0)
-  - SwiftDatabase/Tests (1.0.0):
+  - SwiftDatabase (1.0.3)
+  - SwiftDatabase/Tests (1.0.3):
     - Nimble (= 8.1.2)
     - Quick (= 3.0.0)
 
@@ -22,7 +22,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   Nimble: 3864815b4703c7ebffba875973c70e854489fbae
   Quick: 6d9559f40647bc4d510103842ef2fdd882d753e2
-  SwiftDatabase: 6d48e26b707841d664ee1f81aa67404104503147
+  SwiftDatabase: 1e375b7dfd0d65de7869171bead3b20af90d79e5
 
 PODFILE CHECKSUM: 14808dd254da05a555d5d7fd9c95b0155068e95e
 
