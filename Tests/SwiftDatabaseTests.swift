@@ -138,6 +138,7 @@ class SwiftDatabaseTests: QuickSpec {
                     
                     it("should load the database from a valid URL from init") {
                         database = SwiftDatabase(fileUrl: fileUrl)
+                        database.deleteAllItems(of: Int.self)
                         database.insert(items: [1, 2, 3])
                         var result = database.save()
                         expect(result).to(beTrue())
