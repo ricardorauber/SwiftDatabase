@@ -9,7 +9,7 @@ public class SwiftDatabase {
     
     // MARK: - Properties
     
-    var fileUrl: URL?
+    public var fileUrl: URL?
     var tables: [String: AnyData] = [:]
     
     // MARK: - Initialization

@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name                  = 'SwiftDatabase'
-  s.version               = '1.0.1'
+  s.version               = '1.0.2'
   s.ios.deployment_target = '12.3'
   s.swift_versions        = ['5.0', '5.1', '5.2', '5.3', '5.4']
   s.author                = 'Ricardo Rauber Pereira'
