@@ -34,7 +34,7 @@ If you are using CocoaPods, add this to your Podfile and run `pod install`.
 
 ```Ruby
 target 'Your target name' do
-    pod 'SwiftDatabase', '~> 1.0'
+    pod 'SwiftDatabase', '~> 1.1'
 end
 ```
 
@@ -219,6 +219,21 @@ database.deleteAllItems(
         person.age < 18
     }
 )
+```
+
+### Async Operations
+
+`SwiftDatabase` also supports asynchronous operations. You can even set the quality of service that suits better your needs (the default is `.utility`):
+
+```swift
+database.qos = .background
+
+database.insertAsync(item: Person(id: 1, name: "Steve", age: 50)) { result in
+    print(result) // true
+    self.database.readAsync(itemType: Person.self) { people in
+        print(people) // [Person(id: 1, name: "Steve", age: 50)]
+    }
+}
 ```
 
 ## Thanks 👍
