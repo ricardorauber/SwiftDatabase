@@ -57,10 +57,10 @@ let database = SwiftDatabase()
 
 ```swift
 let database = SwiftDatabase(
-    data: databaseData,
-    fileUrl: URL,
     encoder: myEncoder,
-    decoder: myDecoder
+    decoder: myDecoder,
+    data: databaseData,
+    fileUrl: URL
 )
 ```
 

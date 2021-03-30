@@ -15,10 +15,10 @@ public class SwiftDatabase {
     
     // MARK: - Initialization
     
-    public init(data: Data? = nil,
-                fileUrl: URL? = nil,
-                encoder: JSONEncoder = JSONEncoder(),
-                decoder: JSONDecoder = JSONDecoder()) {
+    public init(encoder: JSONEncoder = JSONEncoder(),
+                decoder: JSONDecoder = JSONDecoder(),
+                data: Data? = nil,
+                fileUrl: URL? = nil) {
         
         self.encoder = encoder
         self.decoder = decoder
@@ -45,6 +45,10 @@ extension SwiftDatabase {
         guard let tables = try? decoder.decode([String: AnyData].self, from: data) else { return false }
         self.tables = tables
         return true
+    }
+    
+    public func clearDatabase() {
+        tables = [:]
     }
 }
 

@@ -11,6 +11,7 @@ public protocol SwiftDatabaseProtocol {
     
     var data: Data? { get }
     func set(data: Data) -> Bool
+    func clearDatabase()
     
     // MARK: - Files
     

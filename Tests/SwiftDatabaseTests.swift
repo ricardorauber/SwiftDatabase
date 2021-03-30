@@ -83,6 +83,16 @@ class SwiftDatabaseTests: QuickSpec {
                         expect(items.count) == 1
                     }
                 }
+            
+                context("clearDatabase") {
+            
+                    it("should clear the database") {
+                        database.insert(item: Person(id: 0, name: "Mike", age: 25))
+                        database.clearDatabase()
+                        let items: [Person] = database.read()
+                        expect(items.count) == 0
+                    }
+                }
             }
             
             context("Files") {
