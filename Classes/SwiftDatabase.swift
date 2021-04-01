@@ -1,6 +1,6 @@
 import Foundation
 
-open class SwiftDatabase {
+open class SwiftDatabase: SwiftDatabaseProtocol {
     
     // MARK: - Dependencies
     
@@ -31,10 +31,8 @@ open class SwiftDatabase {
             load(from: fileUrl)
         }
     }
-}
 
-// MARK: - Data
-extension SwiftDatabase {
+    // MARK: - Data
     
     open var data: Data? {
         try? encoder.encode(tables)
@@ -50,10 +48,8 @@ extension SwiftDatabase {
     open func clearDatabase() {
         tables = [:]
     }
-}
 
-// MARK: - Files
-extension SwiftDatabase {
+    // MARK: - Files
     
     @discardableResult
     open func save(to fileUrl: URL) -> Bool {
@@ -88,10 +84,8 @@ extension SwiftDatabase {
         guard let fileUrl = fileUrl else { return false }
         return load(from: fileUrl)
     }
-}
 
-// MARK: - Tables
-extension SwiftDatabase {
+    // MARK: - Tables
     
     func makeTableName<Item: Codable & Equatable>(name: String? = nil, itemType: Item.Type) -> String {
         name ?? String(describing: Item.self)
@@ -114,16 +108,14 @@ extension SwiftDatabase {
         }
         return nil
     }
-}
 
-// MARK: - Insert
-extension SwiftDatabase {
+    // MARK: - Insert
     
     // MARK: Sync
     
     @discardableResult
     open func insert<Item: Codable & Equatable>(on name: String,
-                                                  item: Item) -> Bool {
+                                                item: Item) -> Bool {
         let name = makeTableName(name: name, itemType: Item.self)
         createTable(name: name)
         var rows: [Item] = getTable(name: name) ?? []
@@ -139,7 +131,7 @@ extension SwiftDatabase {
     
     @discardableResult
     open func insert<Item: Codable & Equatable>(on name: String,
-                                                  items: [Item]) -> Bool {
+                                                items: [Item]) -> Bool {
         let name = makeTableName(name: name, itemType: Item.self)
         createTable(name: name)
         var rows: [Item] = getTable(name: name) ?? []
@@ -156,43 +148,41 @@ extension SwiftDatabase {
     // MARK: Async
     
     open func insertAsync<Item: Codable & Equatable>(on name: String,
-                                                       item: Item,
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     item: Item,
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.insert(on: name, item: item))
         }
     }
     
     open func insertAsync<Item: Codable & Equatable>(item: Item,
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.insert(item: item))
         }
     }
     
     open func insertAsync<Item: Codable & Equatable>(on name: String,
-                                                       items: [Item],
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     items: [Item],
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.insert(on: name, items: items))
         }
     }
     
     open func insertAsync<Item: Codable & Equatable>(items: [Item],
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.insert(items: items))
         }
     }
-}
 
-// MARK: - Read
-extension SwiftDatabase {
-
+    // MARK: - Read
+    
     // MARK: Sync
     
     open func read<Item: Codable & Equatable>(from name: String,
-                                                filter: @escaping ((Item) -> Bool)) -> [Item] {
+                                              filter: @escaping ((Item) -> Bool)) -> [Item] {
         let name = makeTableName(name: name, itemType: Item.self)
         let items: [Item] = getTable(name: name) ?? []
         return items.filter { item in filter(item) }
@@ -219,9 +209,9 @@ extension SwiftDatabase {
     // MARK: Async
     
     open func readAsync<Item: Codable & Equatable>(from name: String,
-                                                     itemType: Item.Type,
-                                                     filter: @escaping ((Item) -> Bool),
-                                                     completion: @escaping ([Item]) -> Void) {
+                                                   itemType: Item.Type,
+                                                   filter: @escaping ((Item) -> Bool),
+                                                   completion: @escaping ([Item]) -> Void) {
         DispatchQueue.global(qos: qos).async {
             let items: [Item] = self.read(from: name, filter: filter)
             completion(items)
@@ -229,8 +219,8 @@ extension SwiftDatabase {
     }
     
     open func readAsync<Item: Codable & Equatable>(itemType: Item.Type,
-                                                     filter: @escaping ((Item) -> Bool),
-                                                     completion: @escaping ([Item]) -> Void) {
+                                                   filter: @escaping ((Item) -> Bool),
+                                                   completion: @escaping ([Item]) -> Void) {
         DispatchQueue.global(qos: qos).async {
             let items: [Item] = self.read(filter: filter)
             completion(items)
@@ -238,8 +228,8 @@ extension SwiftDatabase {
     }
     
     open func readAsync<Item: Codable & Equatable>(from name: String,
-                                                     itemType: Item.Type,
-                                                     completion: @escaping ([Item]) -> Void) {
+                                                   itemType: Item.Type,
+                                                   completion: @escaping ([Item]) -> Void) {
         DispatchQueue.global(qos: qos).async {
             let items: [Item] = self.read(from: name)
             completion(items)
@@ -247,22 +237,20 @@ extension SwiftDatabase {
     }
     
     open func readAsync<Item: Codable & Equatable>(itemType: Item.Type,
-                                                     completion: @escaping ([Item]) -> Void) {
+                                                   completion: @escaping ([Item]) -> Void) {
         DispatchQueue.global(qos: qos).async {
             let items: [Item] = self.read()
             completion(items)
         }
     }
-}
 
-// MARK: - Update
-extension SwiftDatabase {
-
+    // MARK: - Update
+    
     // MARK: Sync
     
     @discardableResult
     open func update<Item: Codable & Equatable>(item: Item,
-                                                  from name: String) -> Bool {
+                                                from name: String) -> Bool {
         let name = makeTableName(name: name, itemType: Item.self)
         var items: [Item] = getTable(name: name) ?? []
         let indexes = items.enumerated().compactMap { $0.element == item ? $0.offset : nil }
@@ -281,7 +269,7 @@ extension SwiftDatabase {
     
     @discardableResult
     open func update<Item: Codable & Equatable>(items: [Item],
-                                                  from name: String) -> Bool {
+                                                from name: String) -> Bool {
         for item in items {
             if !update(item: item, from: name) {
                 return false
@@ -298,9 +286,9 @@ extension SwiftDatabase {
     
     @discardableResult
     open func updateAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                          from name: String,
-                                                          changes: @escaping (Item) -> Item,
-                                                          filter: @escaping ((Item) -> Bool)) -> Bool {
+                                                        from name: String,
+                                                        changes: @escaping (Item) -> Item,
+                                                        filter: @escaping ((Item) -> Bool)) -> Bool {
         let name = makeTableName(name: name, itemType: Item.self)
         var items: [Item] = getTable(name: name) ?? []
         let indexes = items.enumerated().compactMap { filter($0.element) ? $0.offset : nil }
@@ -315,23 +303,23 @@ extension SwiftDatabase {
     
     @discardableResult
     open func updateAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                          changes: @escaping (Item) -> Item,
-                                                          filter: @escaping ((Item) -> Bool)) -> Bool {
+                                                        changes: @escaping (Item) -> Item,
+                                                        filter: @escaping ((Item) -> Bool)) -> Bool {
         let name = makeTableName(name: nil, itemType: Item.self)
         return updateAllItems(of: itemType, from: name, changes: changes, filter: filter)
     }
     
     @discardableResult
     open func updateAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                          from name: String,
-                                                          changes: @escaping (Item) -> Item) -> Bool {
+                                                        from name: String,
+                                                        changes: @escaping (Item) -> Item) -> Bool {
         let filter: ((Item) -> Bool) = { _ in true }
         return updateAllItems(of: itemType, from: name, changes: changes, filter: filter)
     }
     
     @discardableResult
     open func updateAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                          changes: @escaping (Item) -> Item) -> Bool {
+                                                        changes: @escaping (Item) -> Item) -> Bool {
         let name = makeTableName(name: nil, itemType: Item.self)
         let filter: ((Item) -> Bool) = { _ in true }
         return updateAllItems(of: itemType, from: name, changes: changes, filter: filter)
@@ -340,80 +328,78 @@ extension SwiftDatabase {
     // MARK: Async
     
     open func updateAsync<Item: Codable & Equatable>(item: Item,
-                                                       from name: String,
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     from name: String,
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.update(item: item, from: name))
         }
     }
     
     open func updateAsync<Item: Codable & Equatable>(item: Item,
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.update(item: item))
         }
     }
     
     open func updateAsync<Item: Codable & Equatable>(items: [Item],
-                                                       from name: String,
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     from name: String,
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.update(items: items, from: name))
         }
     }
     
     open func updateAsync<Item: Codable & Equatable>(items: [Item],
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.update(items: items))
         }
     }
     
     open func updateAllItemsAsync<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                               from name: String,
-                                                               changes: @escaping (Item) -> Item,
-                                                               filter: @escaping ((Item) -> Bool),
-                                                               completion: @escaping (Bool) -> Void) {
+                                                             from name: String,
+                                                             changes: @escaping (Item) -> Item,
+                                                             filter: @escaping ((Item) -> Bool),
+                                                             completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.updateAllItems(of: itemType, from: name, changes: changes, filter: filter))
         }
     }
     
     open func updateAllItemsAsync<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                               changes: @escaping (Item) -> Item,
-                                                               filter: @escaping ((Item) -> Bool),
-                                                               completion: @escaping (Bool) -> Void) {
+                                                             changes: @escaping (Item) -> Item,
+                                                             filter: @escaping ((Item) -> Bool),
+                                                             completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.updateAllItems(of: itemType, changes: changes, filter: filter))
         }
     }
     
     open func updateAllItemsAsync<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                               from name: String,
-                                                               changes: @escaping (Item) -> Item,
-                                                               completion: @escaping (Bool) -> Void) {
+                                                             from name: String,
+                                                             changes: @escaping (Item) -> Item,
+                                                             completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.updateAllItems(of: itemType, from: name, changes: changes))
         }
     }
     
     open func updateAllItemsAsync<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                               changes: @escaping (Item) -> Item,
-                                                               completion: @escaping (Bool) -> Void) {
+                                                             changes: @escaping (Item) -> Item,
+                                                             completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.updateAllItems(of: itemType, changes: changes))
         }
     }
-}
 
-// MARK: - Delete
-extension SwiftDatabase {
-
+    // MARK: - Delete
+    
     // MARK: Sync
     
     @discardableResult
     open func delete<Item: Codable & Equatable>(item: Item,
-                                                  from name: String) -> Bool {
+                                                from name: String) -> Bool {
         let name = makeTableName(name: name, itemType: Item.self)
         var items: [Item] = getTable(name: name) ?? []
         let indexes = items.enumerated().compactMap { $0.element == item ? $0.offset : nil }
@@ -432,7 +418,7 @@ extension SwiftDatabase {
     
     @discardableResult
     open func delete<Item: Codable & Equatable>(items: [Item],
-                                                  from name: String) -> Bool {
+                                                from name: String) -> Bool {
         for item in items {
             if !delete(item: item, from: name) {
                 return false
@@ -449,8 +435,8 @@ extension SwiftDatabase {
     
     @discardableResult
     open func deleteAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                          from name: String,
-                                                          filter: @escaping ((Item) -> Bool)) -> Bool {
+                                                        from name: String,
+                                                        filter: @escaping ((Item) -> Bool)) -> Bool {
         
         let name = makeTableName(name: name, itemType: Item.self)
         var items: [Item] = getTable(name: name) ?? []
@@ -464,7 +450,7 @@ extension SwiftDatabase {
     
     @discardableResult
     open func deleteAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                          filter: @escaping ((Item) -> Bool)) -> Bool {
+                                                        filter: @escaping ((Item) -> Bool)) -> Bool {
         
         let name = makeTableName(name: nil, itemType: Item.self)
         return deleteAllItems(of: itemType, from: name, filter: filter)
@@ -472,7 +458,7 @@ extension SwiftDatabase {
     
     @discardableResult
     open func deleteAllItems<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                          from name: String) -> Bool {
+                                                        from name: String) -> Bool {
         let filter: ((Item) -> Bool) = { _ in true }
         return deleteAllItems(of: itemType, from: name, filter: filter)
     }
@@ -487,39 +473,39 @@ extension SwiftDatabase {
     // MARK: Async
     
     open func deleteAsync<Item: Codable & Equatable>(item: Item,
-                                                       from name: String,
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     from name: String,
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.delete(item: item, from: name))
         }
     }
     
     open func deleteAsync<Item: Codable & Equatable>(item: Item,
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.delete(item: item))
         }
     }
     
     open func deleteAsync<Item: Codable & Equatable>(items: [Item],
-                                                       from name: String,
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     from name: String,
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.delete(items: items, from: name))
         }
     }
     
     open func deleteAsync<Item: Codable & Equatable>(items: [Item],
-                                                       completion: @escaping (Bool) -> Void) {
+                                                     completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.delete(items: items))
         }
     }
     
     open func deleteAllItemsAsync<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                               from name: String,
-                                                               filter: @escaping ((Item) -> Bool),
-                                                               completion: @escaping (Bool) -> Void) {
+                                                             from name: String,
+                                                             filter: @escaping ((Item) -> Bool),
+                                                             completion: @escaping (Bool) -> Void) {
         
         DispatchQueue.global(qos: qos).async {
             completion(self.deleteAllItems(of: itemType, from: name, filter: filter))
@@ -527,8 +513,8 @@ extension SwiftDatabase {
     }
     
     open func deleteAllItemsAsync<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                               filter: @escaping ((Item) -> Bool),
-                                                               completion: @escaping (Bool) -> Void) {
+                                                             filter: @escaping ((Item) -> Bool),
+                                                             completion: @escaping (Bool) -> Void) {
         
         DispatchQueue.global(qos: qos).async {
             completion(self.deleteAllItems(of: itemType, filter: filter))
@@ -536,20 +522,17 @@ extension SwiftDatabase {
     }
     
     open func deleteAllItemsAsync<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                               from name: String,
-                                                               completion: @escaping (Bool) -> Void) {
+                                                             from name: String,
+                                                             completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.deleteAllItems(of: itemType, from: name))
         }
     }
     
     open func deleteAllItemsAsync<Item: Codable & Equatable>(of itemType: Item.Type,
-                                                               completion: @escaping (Bool) -> Void) {
+                                                             completion: @escaping (Bool) -> Void) {
         DispatchQueue.global(qos: qos).async {
             completion(self.deleteAllItems(of: itemType))
         }
     }
 }
-
-// MARK: - SwiftDatabaseProtocol
-extension SwiftDatabase: SwiftDatabaseProtocol {}
