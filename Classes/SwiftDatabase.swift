@@ -51,6 +51,8 @@ open class SwiftDatabase: SwiftDatabaseProtocol {
 
     // MARK: - Files
     
+    // MARK: Save
+    
     @discardableResult
     open func save(to fileUrl: URL) -> Bool {
         var result = false
@@ -68,6 +70,8 @@ open class SwiftDatabase: SwiftDatabaseProtocol {
         guard let fileUrl = fileUrl else { return false }
         return save(to: fileUrl)
     }
+    
+    // MARK: Load
     
     @discardableResult
     open func load(from fileUrl: URL) -> Bool {
