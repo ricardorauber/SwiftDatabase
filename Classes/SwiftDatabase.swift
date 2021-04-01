@@ -1,6 +1,6 @@
 import Foundation
 
-public class SwiftDatabase {
+open class SwiftDatabase {
     
     // MARK: - Dependencies
     
